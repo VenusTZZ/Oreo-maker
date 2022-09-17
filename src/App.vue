@@ -1,73 +1,84 @@
 <script setup lang="ts">
-import Button from "./components/Button.vue"
-import Canvas from './components/Canvas.vue'
-const handleClick = () => {
-  console.log("handle")
-  show = true
-}
+import { onMounted } from 'vue';
+import Home from './pages/Home.vue'
+import Result from './pages/Result.vue'
+import Loading from './components/Loading.vue'
 
-const oreoList = $ref<string[]>([])
-let show = $ref(false)
-
-const addSlice = (key: 'o' | 'r' | '-' | '-1') => {
-  switch (key) {
-    case 'o':
-      const addKey = oreoList.values.length === 0 ? 'o' : 'ob'
-      oreoList.push(addKey)
-      break;
-    case 'r':
-      oreoList.push('r')
-      break;
-    case '-':
-      if (oreoList.length > 1 && oreoList[oreoList.length - 1] !== '-') {
-        oreoList.push('-')
-      }
-      break;
-    case '-1':
-      oreoList.pop()
+let oreoList = $ref<OreoKey[]>([])
+let loading = $ref(true)
+let animating = $ref(true)
+onMounted(() => {
+  setTimeout(() => {
+    loading = false
+  }, 1000)
+})
+const handleSubmit = (newList: OreoKey[]) => {
+  if (newList.length) {
+    loading = true
+    setTimeout(() => {
+      loading = false
+    }, 1000)
+    oreoList = [...newList]
   }
 }
 </script>
 
 <template>
-  <div flex items-center box-border h-screen w-screen bg="#a4e2c6" p-12>
-    <main bg-white flex="~ col" w-full p-8 rounded-xl shadow="md black/20">
-      <header>
-        <h1 text="center 2xl" font-bold>
-          title
-        </h1>
-      </header>
-      <main py-4>
-        <div flex="~" items-center justify-center text-xl text-truegray-300 min-h-12 bg-gray-100 rounded-xl
-          border="~ truegray-200">
-          我的Oreo
-        </div>
-        <div py-2>
-          {{oreoList}}
-        </div>
-        <div flex py-4 h-10 items-center justify-center gap-4>
-          <Button @click="addSlice('o')">要奥</Button>
-          <Button @click="addSlice('r')">要利</Button>
-          <Button @click="addSlice('-')">在来</Button>
-          <Button @click="addSlice('-1')">不要</Button>
-        </div>
-      </main>
-      <main v-if="show" h="400px">
-        <Canvas :input="oreoList" />
-      </main>
-      <footer flex items-center justify-center mx="-8" mb="-8" h-16 text="white xl" cursor-pointer bg-truegray-700
-        hover="bg-gray-800 text-2xl" text-white rounded-b-xl @click="handleClick">
-        快给我
-      </footer>
-    </main>
+  <div flex="~ col" items-center box-border min-h-screen w-screen bg="#caad9f" p-12>
+    <div v-show="animating" absolute inset-0 flex items-center justify-center>
+      <Transition appear name="bounce" @before-enter="animating = true" @after-leave="animating = false">
+        <Loading v-show="loading" />
+      </Transition>
+    </div>
+    <template v-if="!loading && !animating">
+      <Home v-if="!oreoList.length" @submit="handleSubmit" />
+      <Result v-else :oreoList="oreoList" @back="oreoList=[]" />
+    </template>
   </div>
-
-
 </template>
+
 <style>
 html,
 body {
   margin: 0;
   padding: 0;
+  font-family: "Seto", sans-serif;
+}
+
+a {
+  color: #594439;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #715c50;
+}
+
+@font-face {
+  font-family: "Seto";
+  src: url("./assets/fonts/Seto.woff") format("woff"),
+    url("./assets/fonts/Seto.ttf") format("truetype");
+}
+
+.bounce-enter-active {
+  animation: bounce-in 0.5s;
+}
+
+.bounce-leave-active {
+  animation: bounce-in 0.5s reverse;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 </style>

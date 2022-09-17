@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import O from '../assets/O.png'
-import Ob from '../assets/Ob.png'
-import R from '../assets/R.png'
+import image_of from '../assets/O.png'
+import image_o from '../assets/Ob.png'
+import image_r from '../assets/R.png'
 const props = defineProps<{ input: string[] }>()
 let oreoCanvas = $ref<HTMLCanvasElement | null>(null)
 onMounted(() => {
@@ -24,14 +24,14 @@ const loadImage = async (src: string): Promise<HTMLImageElement> => {
     })
 }
 const loadAllImages = async () => {
-    const o = await loadImage(O)
-    const ob = await loadImage(Ob)
-    const r = await loadImage(R)
-    return { o, ob, r }
+    const of = await loadImage(image_of)
+    const o = await loadImage(image_o)
+    const r = await loadImage(image_r)
+    return { of, o, r }
 }
 interface ImageList {
+    of: HTMLImageElement
     o: HTMLImageElement
-    ob: HTMLImageElement
     r: HTMLImageElement
 }
 interface DrawItem {
@@ -42,19 +42,23 @@ interface DrawItem {
     height: number
 }
 const generateImage = (canvas: HTMLCanvasElement, list: string[], imageList: ImageList) => {
-    console.log(imageList)
+    const copyList = [...list]
     const drawList: DrawItem[] = []
     // Delete '-' at the end
-    if (list[list.length - 1] === '-') {
-        list.pop()
+    if (copyList[copyList.length - 1] === '-') {
+        copyList.pop()
+    }
+    if (copyList[0] === 'o') {
+        copyList[0] = 'of'
     }
     // calculate canvas height
     let height = 0
-    list.forEach(item => {
+    copyList.forEach(item => {
         if (item === '-') {
             height += 72
         } else {
             const drawItem = {
+                // @ts-ignore
                 image: imageList[item],
                 x: item === 'r' ? 10 : 0,
                 y: height,
@@ -80,5 +84,5 @@ defineExpose({
 </script>
 
 <template>
-    <canvas width="240" height="600" ref="oreoCanvas"></canvas>
+    <canvas width="240" height="0" ref="oreoCanvas"></canvas>
 </template>
